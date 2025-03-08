@@ -1,8 +1,10 @@
 import pandas as pd
 from airflow.providers.postgres.hooks.postgres import PostgresHook
-from sqlalchemy import Table, MetaData, Column, Integer, String, Float, DateTime, UniqueConstraint, inspect
+from sqlalchemy import Table, MetaData, Column, Integer, String, Float, DateTime, UniqueConstraint
 
-def create_table():
+def create_table() -> None:
+    from sqlalchemy import Table, MetaData, Column, Integer, String, Float, DateTime, UniqueConstraint
+    from sqlalchemy import inspect
     postgres_hook = PostgresHook('destination_db')
     engine = postgres_hook.get_sqlalchemy_engine()
     
@@ -33,7 +35,7 @@ def create_table():
         Column('multiple_lines', String),
         Column('target', Integer),
         UniqueConstraint('customer_id', name='unique_customer_id')
-    )
+        )
     if not inspect(engine).has_table(alt_users_churn.name): 
         metadata.create_all(engine) 
 
@@ -58,14 +60,14 @@ def extract(**kwargs):
 
 def transform(**kwargs):
     ti = kwargs['ti']
-    data = ti.xcom_pull(task_ids='extract', key='extracted_data')
+    data = ti.xcom_pull(task_id='extract', key='extracted_data')
     data['target'] = (data['end_date'] != 'No').astype(int)
     data['end_date'].replace({'No': None}, inplace=True)
     ti.xcom_push('transformed_data', data)
 
 def load(**kwargs):
     ti = kwargs['ti']
-    data = ti.xcom_pull(task_ids='transform', key='transformed_data')
+    data = ti.xcom_pull(task_id='transform', key='transformed_data')
 
     hook = PostgresHook('destination_db')
     hook.insert_rows(
