@@ -1,22 +1,21 @@
 import pandas as pd
 from airflow.providers.postgres.hooks.postgres import PostgresHook
-from sqlalchemy import Table, MetaData, Column, Integer, String, Float, DateTime, UniqueConstraint
+from sqlalchemy import Table, MetaData, Column, Integer, String, Float, DateTime, UniqueConstraint, inspect
 
 def create_table() -> None:
-    from sqlalchemy import Table, MetaData, Column, Integer, String, Float, DateTime, UniqueConstraint
-    from sqlalchemy import inspect
+    from sqlalchemy import Table, MetaData, Column, Integer, String, Float, DateTime, UniqueConstraint, inspect
     postgres_hook = PostgresHook('destination_db')
     engine = postgres_hook.get_sqlalchemy_engine()
-    
+
     metadata = MetaData()
-    alt_users_churn = Table(
+    users_churn = Table(
         'alt_users_churn',
         metadata,
         Column('id', Integer, primary_key=True, autoincrement=True),
         Column('customer_id', String),
         Column('begin_date', DateTime),
         Column('end_date', DateTime),
-        Column('type', String), 
+        Column('type', String),
         Column('paperless_billing', String),
         Column('payment_method', String),
         Column('monthly_charges', Float),
@@ -33,10 +32,9 @@ def create_table() -> None:
         Column('partner', String),
         Column('dependents', String),
         Column('multiple_lines', String),
-        Column('target', Integer),
-        UniqueConstraint('customer_id', name='unique_customer_id')
+        Column('target', Integer)
         )
-    if not inspect(engine).has_table(alt_users_churn.name): 
+    if not inspect(engine).has_table(users_churn.name): 
         metadata.create_all(engine) 
 
 def extract(**kwargs):
@@ -60,14 +58,14 @@ def extract(**kwargs):
 
 def transform(**kwargs):
     ti = kwargs['ti']
-    data = ti.xcom_pull(task_id='extract', key='extracted_data')
+    data = ti.xcom_pull(task_ids='extract', key='extracted_data')
     data['target'] = (data['end_date'] != 'No').astype(int)
     data['end_date'].replace({'No': None}, inplace=True)
     ti.xcom_push('transformed_data', data)
 
 def load(**kwargs):
     ti = kwargs['ti']
-    data = ti.xcom_pull(task_id='transform', key='transformed_data')
+    data = ti.xcom_pull(task_ids='transform', key='transformed_data')
 
     hook = PostgresHook('destination_db')
     hook.insert_rows(
