@@ -22,5 +22,5 @@ with DAG(
     send_success_step = PythonOperator(task_id='send_telegram_success_message', python_callable=send_telegram_success_message) 
     send_failure_step = PythonOperator(task_id='send_telegram_failure_message', python_callable=send_telegram_failure_message)
 
-    [create_step, extract_step] >> transform_step >> load_step >> [send_success_step, send_failure_step]
+    [create_step, extract_step] >> transform_step >> load_step
   
