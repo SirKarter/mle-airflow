@@ -19,8 +19,8 @@ with DAG(
     extract_step = PythonOperator(task_id='extract', python_callable=extract)
     transform_step = PythonOperator(task_id='transform', python_callable=transform)
     load_step = PythonOperator(task_id='load', python_callable=load)
-    send_success_step = PythonOperator(task_id='send_telegram_success_message', python_callable=send_telegram_success_message) 
-    send_failure_step = PythonOperator(task_id='send_telegram_failure_message', python_callable=send_telegram_failure_message)
+#    send_success_step = PythonOperator(task_id='send_telegram_success_message', python_callable=send_telegram_success_message) 
+#    send_failure_step = PythonOperator(task_id='send_telegram_failure_message', python_callable=send_telegram_failure_message)
 
     [create_step, extract_step] >> transform_step >> load_step
   
