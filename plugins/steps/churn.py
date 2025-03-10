@@ -12,7 +12,7 @@ def create_table() -> None:
         'alt_users_churn',
         metadata,
         Column('id', Integer, primary_key=True, autoincrement=True),
-        Column('customer_id', String, ),
+        Column('customer_id', String, unique=True),
         Column('begin_date', DateTime),
         Column('end_date', DateTime),
         Column('type', String),
