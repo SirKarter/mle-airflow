@@ -84,15 +84,14 @@ def clean_churn_dataset():
             potential_outliers = pd.DataFrame()
 
             for col in num_cols:
-	            Q1 = data[col].quantile(0.25)
-	            Q3 = data[col].quantile(0.75)
-	            IQR = Q3 - Q1
-	            margin = threshold*IQR
-	            lower = Q1 - margin
-	            upper = Q3 + margin
-	            potential_outliers[col] = ~data[col].between(lower, upper)
-
-            outliers = potential_outliers.any(axis=1)
+                Q1 = data[col].quantile(0.25)
+                Q3 = data[col].quantile(0.75)
+                IQR = Q3 - Q1
+                margin = threshold*IQR
+                lower = Q1 - margin
+                upper = Q3 + margin
+                potential_outliers[col] = ~data[col].between(lower, upper)
+            outliers = potential_outliers.any(axis=1)   
             data = data[~outliers]
 
             return data
